@@ -18,13 +18,20 @@ In the dev hub head over to the partner portal and create a new app. You should 
 
 ## Step 3: Start the app
 
-You will need node installed on your system for all of this (and yarn installed). First you need to go to the backend folder and create an .env file with the same content as the .env.example file but fill in your clientId and secret. Never push this into version control. Then its time to install packages, build and run your backend and frontend (respectively in the backend and frontend folder):
+You will need node installed on your system for all of this (and yarn installed). First you need to go to the backend folder and create an .env file with the same content as the .env.example file but fill in your clientId and secret. Never push this into version control. 
+
+First you need to build the SDK. Switch to sdk/js-core and run:
+
+   * yarn install
+   * yarn build
+
+Then its time to build and run your backend and frontend (respectively in the backend and frontend folder):
 
    * yarn install
    * yarn build
    * npm run dev
 
-Now everything should be running. At this point you can activate the app in the hub and it should work. Next you want to start the JTL ERP APP from your app dashboard (did i mention you need to activate that too with a running connected api server beforehand?).
+Now everything should be running (if not try deleting your mode_modules folders and make sure to run the steps in order). At this point you can activate the app in the hub and it should work. Next you want to start the JTL ERP APP from your app dashboard (did i mention you need to activate that too with a running connected api server beforehand?).
 
 ## Step 4: Try stuff
 
@@ -33,3 +40,5 @@ With backend and frontend running in dev mode you can freely change the code or 
 ## Notes
 
 The cloud sdk is not yet publically available and is in the sdk folder. Once its a proper public package this make no more sense. The UI is barebones shadcn. I dit not play around with our component lib yet.
+
+I still need to explain what this app is even doing, but discovering this yourself is half the fun :D.
