@@ -1,0 +1,85 @@
+{
+  "manifestVersion": "1.0.0",
+  "version": "1.0.0",
+  "name": {
+    "short": "Small plugin demo",
+    "full": "Demo plugin for Wawi API access"
+  },
+  "description": {
+    "short": "Eine kleine Plugin Demo",
+    "full": "Demo fuer ein Plugin mit Wawi API Zugriff"
+  },
+  "defaultLocale": "de-DE",
+  "locales": {
+    "de-DE": {
+      "setup": "Einrichtung",
+      "welcome": "Willkommen",
+      "connect": "Verbinden",
+      "settings": "Einstellungen"
+    },
+    "en": {
+      "setup": "Setup",
+      "welcome": "Welcome",
+      "connect": "Connect",
+      "settings": "Settings"
+    }
+  },
+  "icon": {
+    "light": "https://hub.dev.jtl-cloud.com/assets/image-placeholder.png",
+    "dark": "https://hub.dev.jtl-cloud.com/assets/image-placeholder.png"
+  },
+  "communication": {
+    "supportUrl": "https://example.com/support/__ACTIVE_LOCALE__/",
+    "guideUrl": "https://example.com/guide?lang=__ACTIVE_LOCALE__"
+  },
+  "legal": {
+    "gdprRequestUrl": "https://example.com/gdpr/request",
+    "gdprDeleteUrl": "https://example.com/gdpr/delete",
+    "privacyUrl": "https://example.com/privacy",
+    "termsOfUseUrl": "https://example.com/terms-of-use"
+  },
+  "lifecycle": {
+    "setupUrl": "http://localhost:51044/setup",
+    "connectUrl": "https://example.com/lifecycle/connect",
+    "disconnectUrl": "https://example.com/lifecycle/disconnect"
+  },
+  "requirements": {
+    "minCloudApiVersion": "version12"
+  },
+  "capabilities": {
+    "hub": {
+      "appLauncher": {
+        "redirectUrl": "https://erp.dev.jtl-cloud.com/"
+      }
+    },
+    "erp": {
+      "headless": {
+        "url": "http://localhost:51044/"
+      },
+      "menuItems": [
+        {
+          "id": "wawiPluginDemo",
+          "name": "Wawi Plugin Demo",
+          "url": "http://localhost:51044/"
+        }
+      ],
+      "tabs": [
+        {
+          "context": "productDetail",
+          "name": "Demo data",
+          "url": "https://jtl.integrations.example.com/wawi/tabs/product/detail",
+          "features": [
+            "details:full",
+            "pricing:write"
+          ]
+        }
+      ],
+      "api": {
+        "scopes": [
+          "productRead",
+          "productDelete"
+        ]
+      }
+    }
+  }
+} 
