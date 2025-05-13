@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { CustomerEditModal } from "@/components/CustomerEditModal";
 
 interface CustomerListProps {
   customers: any;
@@ -23,6 +25,22 @@ const CustomerDebugSection = ({ data }: { data: any }) => (
 );
 
 export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading = false }) => {
+  const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  
+  const handleCardClick = (customer: any) => {
+    setSelectedCustomer(customer);
+    setIsModalOpen(true);
+  };
+  
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedCustomer(null);
+  };
+  
+  const handleCustomerUpdated = () => {
+    console.log('Customer updated, should refresh data');
+  };
   const extractCustomerData = (customer: any) => {
     const firstName = customer.BillingAddress?.FirstName || 
                      customer.firstName || customer.firstname || customer.first_name || 
@@ -98,7 +116,11 @@ export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading
             const { firstName, lastName, city } = extractCustomerData(customer);
             
             return (
-              <Card key={index} className="overflow-hidden">
+              <Card 
+                key={index} 
+                className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleCardClick(customer)}
+              >
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">
                     {firstName} {lastName}
@@ -135,6 +157,13 @@ export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading
     <div className="space-y-4">
       <CustomerDebugSection data={customers} />
       {renderContent()}
+      
+      <CustomerEditModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onCustomerUpdated={handleCustomerUpdated}
+        customer={selectedCustomer}
+      />
     </div>
   );
 };
