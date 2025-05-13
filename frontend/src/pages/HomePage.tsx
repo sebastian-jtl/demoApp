@@ -12,8 +12,10 @@ export const HomePage = () => {
       try {
         const token = await getSessionToken();
         const data = await wawiClient.get<any>('/api/erp/customers', token);
+        console.log('Customer data received:', data);
         setCustomers(data);
       } catch (err: any) {
+        console.error('Error fetching customers:', err);
         setError(`Fehler beim Abrufen der Kundendaten: ${err}`);
         setCustomers(null);
       } finally {
@@ -30,7 +32,7 @@ export const HomePage = () => {
 
       {loading && <p className="text-gray-600">Lade Daten...</p>}
       {error && <p className="text-red-600">{error}</p>}
-      {customers && (
+      {customers ? (
         <div className="bg-white p-4 rounded shadow w-full max-w-3xl">
           <h2 className="text-xl font-semibold mb-4">Kundenliste</h2>
           
@@ -38,48 +40,82 @@ export const HomePage = () => {
           <div className="mb-4 p-2 bg-gray-100 rounded text-xs">
             <p>Data type: {typeof customers}</p>
             <p>Is array: {Array.isArray(customers) ? 'Yes' : 'No'}</p>
-            {typeof customers === 'object' && !Array.isArray(customers) && (
+            {typeof customers === 'object' && customers !== null && !Array.isArray(customers) && (
               <p>Object keys: {Object.keys(customers).join(', ')}</p>
             )}
+            <details>
+              <summary className="text-blue-500 cursor-pointer">Raw data</summary>
+              <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                {JSON.stringify(customers, null, 2)}
+              </pre>
+            </details>
           </div>
           
           {/* Handle different possible data structures */}
           {(() => {
-            if (typeof customers === 'object' && customers !== null) {
-              if (customers.Items && Array.isArray(customers.Items)) {
-                return renderCustomerList(customers.Items);
+            try {
+              if (typeof customers === 'object' && customers !== null) {
+                console.log('Checking for Items array:', customers.Items);
+                
+                if (customers.Items && Array.isArray(customers.Items)) {
+                  console.log('Found Items array with length:', customers.Items.length);
+                  return renderCustomerList(customers.Items);
+                }
+                
+                if (typeof customers.TotalItems === 'number' && customers.Items === undefined) {
+                  console.log('Found TotalItems but no Items array, checking for other properties');
+                }
+                
+                if (Array.isArray(customers)) {
+                  return renderCustomerList(customers);
+                }
+                
+                const customersArray = customers.data || customers.items || customers.results || 
+                                      customers.customers || customers.customerList;
+                
+                if (Array.isArray(customersArray)) {
+                  return renderCustomerList(customersArray);
+                }
+                
+                const keys = Object.keys(customers);
+                if (keys.length > 0 && keys.every(key => !isNaN(Number(key)))) {
+                  const arrayFromObject = keys.map(key => customers[key]);
+                  return renderCustomerList(arrayFromObject);
+                }
               }
               
-              if (Array.isArray(customers)) {
-                return renderCustomerList(customers);
-              }
-              
-              const customersArray = customers.data || customers.items || customers.results || 
-                                    customers.customers || customers.customerList;
-              
-              if (Array.isArray(customersArray)) {
-                return renderCustomerList(customersArray);
-              }
-              
-              const keys = Object.keys(customers);
-              if (keys.length > 0 && keys.every(key => !isNaN(Number(key)))) {
-                const arrayFromObject = keys.map(key => customers[key]);
-                return renderCustomerList(arrayFromObject);
-              }
+              return (
+                <div>
+                  <p className="text-gray-500 mb-2">Keine Kundendaten verfügbar oder ungültiges Format.</p>
+                  <details>
+                    <summary className="text-blue-500 cursor-pointer">Datenstruktur anzeigen</summary>
+                    <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                      {JSON.stringify(customers, null, 2)}
+                    </pre>
+                  </details>
+                </div>
+              );
+            } catch (error) {
+              console.error('Error rendering customer list:', error);
+              return (
+                <div>
+                  <p className="text-red-500 mb-2">Fehler beim Rendern der Kundenliste: {String(error)}</p>
+                  <details>
+                    <summary className="text-blue-500 cursor-pointer">Fehlerdetails</summary>
+                    <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
+                      {String(error)}
+                      {error.stack && `\n\n${error.stack}`}
+                    </pre>
+                  </details>
+                </div>
+              );
             }
-            
-            return (
-              <div>
-                <p className="text-gray-500 mb-2">Keine Kundendaten verfügbar oder ungültiges Format.</p>
-                <details>
-                  <summary className="text-blue-500 cursor-pointer">Datenstruktur anzeigen</summary>
-                  <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
-                    {JSON.stringify(customers, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            );
           })()}
+        </div>
+      ) : (
+        <div className="bg-white p-4 rounded shadow w-full max-w-3xl">
+          <h2 className="text-xl font-semibold mb-4">Kundenliste</h2>
+          <p className="text-gray-500">Keine Kundendaten verfügbar.</p>
         </div>
       )}
       
