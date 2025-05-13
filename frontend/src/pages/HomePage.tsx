@@ -7,6 +7,39 @@ export const HomePage = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
+  const renderCustomerList = (customerArray) => {
+    return customerArray && customerArray.length > 0 ? (
+      <ul className="divide-y divide-gray-200">
+        {customerArray.map((customer, index) => {
+          const firstName = customer.BillingAddress?.FirstName || 
+                           customer.firstName || customer.firstname || customer.first_name || 
+                           customer.vorname || customer.Vorname || '';
+          
+          const lastName = customer.BillingAddress?.LastName || 
+                          customer.lastName || customer.lastname || customer.last_name || 
+                          customer.nachname || customer.Nachname || '';
+          
+          return (
+            <li key={index} className="py-3 flex items-center">
+              <div className="flex-1">
+                <p className="font-medium">
+                  {firstName} {lastName}
+                </p>
+                {customer.BillingAddress?.City && (
+                  <p className="text-sm text-gray-500">
+                    {customer.BillingAddress.City}
+                  </p>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    ) : (
+      <p className="text-gray-500">Keine Kunden gefunden.</p>
+    );
+  };
+
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
@@ -118,40 +151,6 @@ export const HomePage = () => {
           <p className="text-gray-500">Keine Kundendaten verfügbar.</p>
         </div>
       )}
-      
-      {/* Helper function to render customer list */}
-      {function renderCustomerList(customerArray) {
-        return customerArray && customerArray.length > 0 ? (
-          <ul className="divide-y divide-gray-200">
-            {customerArray.map((customer, index) => {
-              const firstName = customer.BillingAddress?.FirstName || 
-                               customer.firstName || customer.firstname || customer.first_name || 
-                               customer.vorname || customer.Vorname || '';
-              
-              const lastName = customer.BillingAddress?.LastName || 
-                              customer.lastName || customer.lastname || customer.last_name || 
-                              customer.nachname || customer.Nachname || '';
-              
-              return (
-                <li key={index} className="py-3 flex items-center">
-                  <div className="flex-1">
-                    <p className="font-medium">
-                      {firstName} {lastName}
-                    </p>
-                    {customer.BillingAddress?.City && (
-                      <p className="text-sm text-gray-500">
-                        {customer.BillingAddress.City}
-                      </p>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        ) : (
-          <p className="text-gray-500">Keine Kunden gefunden.</p>
-        );
-      }}
     </div>
   );
 };
