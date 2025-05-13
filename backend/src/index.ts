@@ -14,7 +14,7 @@ app.use(cors({
     'http://localhost:5173',  // Vite Standard-Port
     'http://localhost:4173'   // Vite Preview-Port
   ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
@@ -49,4 +49,4 @@ app.use((err: any, _req: express.Request, res: express.Response, _next: express.
 // gogogo
 app.listen(PORT, () => {
   logger.info(`⚡️ Server running on http://localhost:${PORT}`);
-}); 
+});  
