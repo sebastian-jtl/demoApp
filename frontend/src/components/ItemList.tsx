@@ -1,5 +1,7 @@
 import * as React from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ItemEditModal } from "@/components/ItemEditModal";
 
 interface ItemListProps {
   items: any;
@@ -23,6 +25,23 @@ const ItemDebugSection = ({ data }: { data: any }) => (
 );
 
 export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) => {
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  
+  const handleCardClick = (item: any) => {
+    setSelectedItem(item);
+    setIsModalOpen(true);
+  };
+  
+  const handleModalClose = () => {
+    setIsModalOpen(false);
+    setSelectedItem(null);
+  };
+  
+  const handleItemUpdated = () => {
+    console.log('Item updated, should refresh data');
+  };
+  
   const extractItemData = (item: any) => {
     const sku = item.SKU || item.sku || item.Sku || item.articleNumber || item.ArticleNumber || '';
     const name = item.Name || item.name || item.ItemName || item.itemName || item.description || item.Description || '';
@@ -93,7 +112,8 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
             return (
               <Card 
                 key={index} 
-                className="overflow-hidden hover:shadow-md transition-shadow"
+                className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleCardClick(item)}
               >
                 <CardHeader className="pb-2">
                   <CardTitle className="text-lg">
@@ -129,6 +149,13 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
     <div className="space-y-4">
       <ItemDebugSection data={items} />
       {renderContent()}
+      
+      <ItemEditModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        onItemUpdated={handleItemUpdated}
+        item={selectedItem}
+      />
     </div>
   );
 };
