@@ -153,7 +153,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading
             <summary className="text-blue-500 cursor-pointer">Fehlerdetails</summary>
             <pre className="mt-2 p-2 bg-gray-100 rounded text-xs overflow-auto">
               {String(error)}
-              {error.stack && `\n\n${error.stack}`}
+              {error instanceof Error && error.stack && `\n\n${error.stack}`}
             </pre>
           </details>
         </div>
