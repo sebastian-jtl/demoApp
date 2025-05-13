@@ -54,7 +54,8 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
       
       const itemData = {
         SKU: sku.trim() || "Neu",
-        Name: name.trim() || "Neuer Artikel"
+        Name: name.trim() || "Neuer Artikel",
+        categories: [1]  // Adding required categories field with default category ID
       };
       
       await wawiClient.post(
