@@ -31,9 +31,24 @@ export const HomePage = () => {
       {loading && <p className="text-gray-600">Lade Daten...</p>}
       {error && <p className="text-red-600">{error}</p>}
       {customers && (
-        <pre className="bg-white p-4 rounded shadow text-sm w-full max-w-3xl overflow-x-auto">
-          {JSON.stringify(customers, null, 2)}
-        </pre>
+        <div className="bg-white p-4 rounded shadow w-full max-w-3xl">
+          <h2 className="text-xl font-semibold mb-4">Kundenliste</h2>
+          {Array.isArray(customers) ? (
+            <ul className="divide-y divide-gray-200">
+              {customers.map((customer, index) => (
+                <li key={index} className="py-3 flex items-center">
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {customer.firstName || customer.firstname || customer.first_name || ''} {customer.lastName || customer.lastname || customer.last_name || ''}
+                    </p>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-gray-500">Keine Kundendaten verfügbar oder ungültiges Format.</p>
+          )}
+        </div>
       )}
     </div>
   );
