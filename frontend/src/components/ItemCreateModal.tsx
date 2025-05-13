@@ -26,6 +26,10 @@ interface Category {
   id?: number;
   name?: string;
   categoryId?: number;
+  ParentId?: number | null;
+  parentId?: number | null;
+  children?: Category[];
+  level?: number;
 }
 
 interface ItemCreateModalProps {
@@ -64,10 +68,71 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
   const getCategoryName = (category: Category): string => {
     return category.Name || category.name || "Unbekannte Kategorie";
   };
+  
+  const buildCategoryTree = (categories: Category[]): Category[] => {
+    const categoryMap = new Map<number, Category>();
+    const rootCategories: Category[] = [];
+    
+    categories.forEach(category => {
+      const id = getCategoryId(category);
+      categoryMap.set(id, { ...category, children: [], level: 0 });
+    });
+    
+    categories.forEach(category => {
+      const id = getCategoryId(category);
+      const parentId = category.ParentId || category.parentId;
+      const mappedCategory = categoryMap.get(id);
+      
+      if (!mappedCategory) return;
+      
+      if (parentId === null || parentId === undefined || parentId === 0) {
+        rootCategories.push(mappedCategory);
+      } else {
+        const parent = categoryMap.get(parentId);
+        if (parent) {
+          if (!parent.children) {
+            parent.children = [];
+          }
+          mappedCategory.level = (parent.level || 0) + 1;
+          parent.children.push(mappedCategory);
+        } else {
+          rootCategories.push(mappedCategory);
+        }
+      }
+    });
+    
+    return rootCategories;
+  };
 
   const handleClose = () => {
     resetForm();
     onClose();
+  };
+  
+  const renderCategoryTree = (categories: Category[], level: number): JSX.Element[] => {
+    return categories.flatMap((category, index) => {
+      const indent = level * 16; // 16px per level
+      
+      const items: JSX.Element[] = [
+        <DropdownMenuItem
+          key={`${getCategoryId(category)}-${index}`}
+          onClick={() => setSelectedCategory(category)}
+          style={{ paddingLeft: `${indent + 8}px` }}
+          className="flex items-center"
+        >
+          {level > 0 && (
+            <span className="mr-1 text-gray-400">{'└─'}</span>
+          )}
+          <span>{getCategoryName(category)}</span>
+        </DropdownMenuItem>
+      ];
+      
+      if (category.children && category.children.length > 0) {
+        items.push(...renderCategoryTree(category.children, level + 1));
+      }
+      
+      return items;
+    });
   };
   
   const fetchCategories = async () => {
@@ -80,16 +145,12 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
       
       console.log('Categories data received:', data);
       
+      let flatCategories: Category[] = [];
+      
       if (data && Array.isArray(data.Items)) {
-        setCategories(data.Items);
-        if (data.Items.length > 0) {
-          setSelectedCategory(data.Items[0]);
-        }
+        flatCategories = data.Items;
       } else if (Array.isArray(data)) {
-        setCategories(data);
-        if (data.length > 0) {
-          setSelectedCategory(data[0]);
-        }
+        flatCategories = data;
       } else if (data && typeof data === 'object') {
         const possibleItems = 
           data.items || 
@@ -98,17 +159,23 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
           data.data;
           
         if (Array.isArray(possibleItems)) {
-          setCategories(possibleItems);
-          if (possibleItems.length > 0) {
-            setSelectedCategory(possibleItems[0]);
-          }
+          flatCategories = possibleItems;
         } else {
           console.error('Unexpected categories data format:', data);
           setCategoryError('Unerwartetes Datenformat für Kategorien');
+          return;
         }
       } else {
         console.error('Unexpected categories data format:', data);
         setCategoryError('Unerwartetes Datenformat für Kategorien');
+        return;
+      }
+      
+      const treeCategories = buildCategoryTree(flatCategories);
+      setCategories(treeCategories);
+      
+      if (flatCategories.length > 0) {
+        setSelectedCategory(flatCategories[0]);
       }
     } catch (err: any) {
       console.error('Error fetching categories:', err);
@@ -235,15 +302,9 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
                       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-full max-h-[200px] overflow-y-auto">
-                    {categories.map((category, index) => (
-                      <DropdownMenuItem
-                        key={index}
-                        onClick={() => setSelectedCategory(category)}
-                      >
-                        {getCategoryName(category)}
-                      </DropdownMenuItem>
-                    ))}
+                  <DropdownMenuContent className="w-full max-h-[300px] overflow-y-auto">
+                    {/* Recursive rendering of category tree */}
+                    {renderCategoryTree(categories, 0)}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
