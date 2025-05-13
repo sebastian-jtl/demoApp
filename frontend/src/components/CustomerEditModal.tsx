@@ -22,6 +22,8 @@ interface CustomerEditModalProps {
     BillingAddress?: {
       FirstName?: string;
       LastName?: string;
+      Company?: string;
+      CountryIso?: string;
     };
     firstName?: string;
     lastName?: string;
@@ -33,6 +35,14 @@ interface CustomerEditModalProps {
     nachname?: string;
     Vorname?: string;
     Nachname?: string;
+    company?: string;
+    Company?: string;
+    companyName?: string;
+    CompanyName?: string;
+    countryIso?: string;
+    CountryIso?: string;
+    country?: string;
+    Country?: string;
   } | null;
 }
 
@@ -44,6 +54,8 @@ export const CustomerEditModal: React.FC<CustomerEditModalProps> = ({
 }) => {
   const [firstName, setFirstName] = useState<string>("");
   const [lastName, setLastName] = useState<string>("");
+  const [company, setCompany] = useState<string>("");
+  const [countryIso, setCountryIso] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -67,8 +79,26 @@ export const CustomerEditModal: React.FC<CustomerEditModalProps> = ({
         customer.Nachname || 
         "";
       
+      const extractedCompany = 
+        customer.BillingAddress?.Company || 
+        customer.company || 
+        customer.Company || 
+        customer.companyName || 
+        customer.CompanyName || 
+        "";
+      
+      const extractedCountryIso = 
+        customer.BillingAddress?.CountryIso || 
+        customer.countryIso || 
+        customer.CountryIso || 
+        customer.country || 
+        customer.Country || 
+        "";
+      
       setFirstName(extractedFirstName);
       setLastName(extractedLastName);
+      setCompany(extractedCompany);
+      setCountryIso(extractedCountryIso);
     }
   }, [customer]);
 
@@ -96,6 +126,14 @@ export const CustomerEditModal: React.FC<CustomerEditModalProps> = ({
       
       if (lastName.trim()) {
         updateData.BillingAddress.LastName = lastName.trim();
+      }
+      
+      if (company.trim()) {
+        updateData.BillingAddress.Company = company.trim();
+      }
+      
+      if (countryIso.trim()) {
+        updateData.BillingAddress.CountryIso = countryIso.trim();
       }
       
       if (Object.keys(updateData.BillingAddress).length > 0) {
@@ -155,6 +193,34 @@ export const CustomerEditModal: React.FC<CustomerEditModalProps> = ({
               onChange={(e) => setLastName(e.target.value)}
               className="col-span-3"
               placeholder="Nachname eingeben"
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="company" className="text-right">
+              Firma
+            </label>
+            <Input
+              id="company"
+              value={company}
+              onChange={(e) => setCompany(e.target.value)}
+              className="col-span-3"
+              placeholder="Firma eingeben"
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="countryIso" className="text-right">
+              Land
+            </label>
+            <Input
+              id="countryIso"
+              value={countryIso}
+              onChange={(e) => setCountryIso(e.target.value)}
+              className="col-span-3"
+              placeholder="Ländercode eingeben (z.B. DE)"
               disabled={isSubmitting}
             />
           </div>
