@@ -52,7 +52,15 @@ export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading
     
     const city = customer.BillingAddress?.City || customer.city || customer.City || '';
     
-    return { firstName, lastName, city };
+    const company = customer.BillingAddress?.Company || 
+                   customer.company || customer.Company || 
+                   customer.companyName || customer.CompanyName || '';
+    
+    const countryIso = customer.BillingAddress?.CountryIso || 
+                      customer.countryIso || customer.CountryIso || 
+                      customer.country || customer.Country || '';
+    
+    return { firstName, lastName, city, company, countryIso };
   };
 
   const extractCustomersArray = (data: any): any[] => {
@@ -113,7 +121,7 @@ export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading
       return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {customersArray.map((customer, index) => {
-            const { firstName, lastName, city } = extractCustomerData(customer);
+            const { firstName, lastName, city, company, countryIso } = extractCustomerData(customer);
             
             return (
               <Card 
@@ -126,11 +134,11 @@ export const CustomerList: React.FC<CustomerListProps> = ({ customers, isLoading
                     {firstName} {lastName}
                   </CardTitle>
                 </CardHeader>
-                {city && (
-                  <CardContent className="pt-0 text-sm text-gray-500">
-                    {city}
-                  </CardContent>
-                )}
+                <CardContent className="pt-0 text-sm text-gray-500 space-y-1">
+                  {company && <div>{company}</div>}
+                  {city && <div>{city}</div>}
+                  {countryIso && <div>Land: {countryIso}</div>}
+                </CardContent>
               </Card>
             );
           })}
