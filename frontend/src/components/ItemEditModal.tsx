@@ -30,6 +30,10 @@ interface ItemEditModalProps {
     itemName?: string;
     description?: string;
     Description?: string;
+    ASIN?: string;
+    asin?: string;
+    AmazonId?: string;
+    amazonId?: string;
   } | null;
 }
 
@@ -41,6 +45,7 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
 }) => {
   const [sku, setSku] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const [asin, setAsin] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -63,8 +68,16 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
         item.Description || 
         "";
       
+      const extractedAsin = 
+        item.ASIN || 
+        item.asin || 
+        item.AmazonId || 
+        item.amazonId || 
+        "";
+      
       setSku(extractedSku);
       setName(extractedName);
+      setAsin(extractedAsin);
     }
   }, [item]);
 
@@ -90,6 +103,10 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
       
       if (name.trim()) {
         updateData.Name = name.trim();
+      }
+      
+      if (asin.trim()) {
+        updateData.ASIN = asin.trim();
       }
       
       if (Object.keys(updateData).length > 0) {
@@ -149,6 +166,20 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               className="col-span-3"
               placeholder="Name eingeben"
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="asin" className="text-right">
+              ASIN
+            </label>
+            <Input
+              id="asin"
+              value={asin}
+              onChange={(e) => setAsin(e.target.value)}
+              className="col-span-3"
+              placeholder="ASIN eingeben"
               disabled={isSubmitting}
             />
           </div>

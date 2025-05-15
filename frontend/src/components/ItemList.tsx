@@ -45,8 +45,9 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
   const extractItemData = (item: any) => {
     const sku = item.SKU || item.sku || item.Sku || item.articleNumber || item.ArticleNumber || '';
     const name = item.Name || item.name || item.ItemName || item.itemName || item.description || item.Description || '';
+    const asin = item.ASIN || item.asin || item.AmazonId || item.amazonId || '';
     
-    return { sku, name };
+    return { sku, name, asin };
   };
 
   const extractItemsArray = (data: any): any[] => {
@@ -107,7 +108,7 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
       return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {itemsArray.map((item, index) => {
-            const { sku, name } = extractItemData(item);
+            const { sku, name, asin } = extractItemData(item);
             
             return (
               <Card 
@@ -122,6 +123,7 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
                 </CardHeader>
                 <CardContent className="pt-0 text-sm text-gray-500">
                   {sku && <div>SKU: {sku}</div>}
+                  {asin && <div>ASIN: {asin}</div>}
                 </CardContent>
               </Card>
             );
