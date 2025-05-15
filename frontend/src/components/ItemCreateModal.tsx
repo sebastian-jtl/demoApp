@@ -45,7 +45,8 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
 }) => {
   const [sku, setSku] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [asin, setAsin] = useState<string>("");
+  const [asins, setAsins] = useState<string[]>([]);
+  const [currentAsin, setCurrentAsin] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -58,7 +59,8 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
   const resetForm = () => {
     setSku("");
     setName("");
-    setAsin("");
+    setAsins([]);
+    setCurrentAsin("");
     setSelectedCategory(null);
     setError(null);
   };
@@ -214,7 +216,7 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
       const itemData = {
         SKU: sku.trim() || "Neu",
         Name: name.trim() || "Neuer Artikel",
-        ASIN: asin.trim() || "",
+        asins: asins,
         categories: [{ categoryId }]  // Format as array of objects with categoryId property
       };
       
@@ -278,18 +280,64 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
             />
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="asin" className="text-right">
-              ASIN
+          <div className="grid grid-cols-4 items-start gap-4">
+            <label htmlFor="asins" className="text-right pt-2">
+              ASINs
             </label>
-            <Input
-              id="asin"
-              value={asin}
-              onChange={(e) => setAsin(e.target.value)}
-              className="col-span-3"
-              placeholder="ASIN eingeben"
-              disabled={isSubmitting}
-            />
+            <div className="col-span-3 space-y-2">
+              {asins.map((asin, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    value={asin}
+                    onChange={(e) => {
+                      const newAsins = [...asins];
+                      newAsins[index] = e.target.value;
+                      setAsins(newAsins);
+                    }}
+                    className="flex-1"
+                    placeholder="ASIN eingeben"
+                    disabled={isSubmitting}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const newAsins = [...asins];
+                      newAsins.splice(index, 1);
+                      setAsins(newAsins);
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <Input
+                  id="currentAsin"
+                  value={currentAsin}
+                  onChange={(e) => setCurrentAsin(e.target.value)}
+                  className="flex-1"
+                  placeholder="Neuen ASIN eingeben"
+                  disabled={isSubmitting}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    if (currentAsin.trim()) {
+                      setAsins([...asins, currentAsin.trim()]);
+                      setCurrentAsin("");
+                    }
+                  }}
+                  disabled={isSubmitting}
+                >
+                  +
+                </Button>
+              </div>
+            </div>
           </div>
           
           <div className="grid grid-cols-4 items-center gap-4">

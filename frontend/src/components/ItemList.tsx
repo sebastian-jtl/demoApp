@@ -45,9 +45,14 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
   const extractItemData = (item: any) => {
     const sku = item.SKU || item.sku || item.Sku || item.articleNumber || item.ArticleNumber || '';
     const name = item.Name || item.name || item.ItemName || item.itemName || item.description || item.Description || '';
-    const asin = item.ASIN || item.asin || item.AmazonId || item.amazonId || '';
+    const asins = item.asins || 
+                 (item.ASIN ? [item.ASIN] : []) || 
+                 (item.asin ? [item.asin] : []) || 
+                 (item.AmazonId ? [item.AmazonId] : []) || 
+                 (item.amazonId ? [item.amazonId] : []) || 
+                 [];
     
-    return { sku, name, asin };
+    return { sku, name, asins };
   };
 
   const extractItemsArray = (data: any): any[] => {
@@ -108,7 +113,7 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
       return (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {itemsArray.map((item, index) => {
-            const { sku, name, asin } = extractItemData(item);
+            const { sku, name, asins } = extractItemData(item);
             
             return (
               <Card 
@@ -123,7 +128,9 @@ export const ItemList: React.FC<ItemListProps> = ({ items, isLoading = false }) 
                 </CardHeader>
                 <CardContent className="pt-0 text-sm text-gray-500">
                   {sku && <div>SKU: {sku}</div>}
-                  {asin && <div>ASIN: {asin}</div>}
+                  {asins && asins.length > 0 && (
+                    <div>ASINs: {asins.join(', ')}</div>
+                  )}
                 </CardContent>
               </Card>
             );
