@@ -45,6 +45,7 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
 }) => {
   const [sku, setSku] = useState<string>("");
   const [name, setName] = useState<string>("");
+  const [asin, setAsin] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -57,6 +58,7 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
   const resetForm = () => {
     setSku("");
     setName("");
+    setAsin("");
     setSelectedCategory(null);
     setError(null);
   };
@@ -212,6 +214,7 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
       const itemData = {
         SKU: sku.trim() || "Neu",
         Name: name.trim() || "Neuer Artikel",
+        ASIN: asin.trim() || "",
         categories: [{ categoryId }]  // Format as array of objects with categoryId property
       };
       
@@ -271,6 +274,20 @@ export const ItemCreateModal: React.FC<ItemCreateModalProps> = ({
               onChange={(e) => setName(e.target.value)}
               className="col-span-3"
               placeholder="Name eingeben"
+              disabled={isSubmitting}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="asin" className="text-right">
+              ASIN
+            </label>
+            <Input
+              id="asin"
+              value={asin}
+              onChange={(e) => setAsin(e.target.value)}
+              className="col-span-3"
+              placeholder="ASIN eingeben"
               disabled={isSubmitting}
             />
           </div>
