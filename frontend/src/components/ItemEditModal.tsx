@@ -32,6 +32,7 @@ interface ItemEditModalProps {
     Description?: string;
     ASIN?: string;
     asin?: string;
+    asins?: string[];
     AmazonId?: string;
     amazonId?: string;
   } | null;
@@ -45,7 +46,8 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
 }) => {
   const [sku, setSku] = useState<string>("");
   const [name, setName] = useState<string>("");
-  const [asin, setAsin] = useState<string>("");
+  const [asins, setAsins] = useState<string[]>([]);
+  const [currentAsin, setCurrentAsin] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -68,16 +70,17 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
         item.Description || 
         "";
       
-      const extractedAsin = 
-        item.ASIN || 
-        item.asin || 
-        item.AmazonId || 
-        item.amazonId || 
-        "";
+      const extractedAsins = 
+        item.asins || 
+        (item.ASIN ? [item.ASIN] : []) || 
+        (item.asin ? [item.asin] : []) || 
+        (item.AmazonId ? [item.AmazonId] : []) || 
+        (item.amazonId ? [item.amazonId] : []) || 
+        [];
       
       setSku(extractedSku);
       setName(extractedName);
-      setAsin(extractedAsin);
+      setAsins(extractedAsins);
     }
   }, [item]);
 
@@ -105,8 +108,8 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
         updateData.Name = name.trim();
       }
       
-      if (asin.trim()) {
-        updateData.ASIN = asin.trim();
+      if (asins.length > 0) {
+        updateData.asins = asins;
       }
       
       if (Object.keys(updateData).length > 0) {
@@ -170,18 +173,64 @@ export const ItemEditModal: React.FC<ItemEditModalProps> = ({
             />
           </div>
           
-          <div className="grid grid-cols-4 items-center gap-4">
-            <label htmlFor="asin" className="text-right">
-              ASIN
+          <div className="grid grid-cols-4 items-start gap-4">
+            <label htmlFor="asins" className="text-right pt-2">
+              ASINs
             </label>
-            <Input
-              id="asin"
-              value={asin}
-              onChange={(e) => setAsin(e.target.value)}
-              className="col-span-3"
-              placeholder="ASIN eingeben"
-              disabled={isSubmitting}
-            />
+            <div className="col-span-3 space-y-2">
+              {asins.map((asin, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    value={asin}
+                    onChange={(e) => {
+                      const newAsins = [...asins];
+                      newAsins[index] = e.target.value;
+                      setAsins(newAsins);
+                    }}
+                    className="flex-1"
+                    placeholder="ASIN eingeben"
+                    disabled={isSubmitting}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const newAsins = [...asins];
+                      newAsins.splice(index, 1);
+                      setAsins(newAsins);
+                    }}
+                    disabled={isSubmitting}
+                  >
+                    ✕
+                  </Button>
+                </div>
+              ))}
+              <div className="flex items-center gap-2">
+                <Input
+                  id="currentAsin"
+                  value={currentAsin}
+                  onChange={(e) => setCurrentAsin(e.target.value)}
+                  className="flex-1"
+                  placeholder="Neuen ASIN eingeben"
+                  disabled={isSubmitting}
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    if (currentAsin.trim()) {
+                      setAsins([...asins, currentAsin.trim()]);
+                      setCurrentAsin("");
+                    }
+                  }}
+                  disabled={isSubmitting}
+                >
+                  +
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
         
