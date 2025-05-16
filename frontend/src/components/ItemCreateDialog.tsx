@@ -43,8 +43,6 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
   const [categoryLoading, setCategoryLoading] = useState(false);
 
   const fetchCategories = useCallback(async () => {
-    if (!isOpen) return;
-    
     setCategoryLoading(true);
     try {
       const token = await getSessionToken();
@@ -53,9 +51,11 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
       const categoriesArray = Array.isArray(data) ? data : 
                              data.Categories || data.categories || data.items || data.results || [];
       
+      console.log('Categories fetched:', categoriesArray);
       setCategories(categoriesArray);
       
       const tree = buildCategoryTree(categoriesArray);
+      console.log('Category tree built:', tree);
       setCategoryTree(tree);
     } catch (err: any) {
       console.error('Error fetching categories:', err);
@@ -63,11 +63,14 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
     } finally {
       setCategoryLoading(false);
     }
-  }, [isOpen]);
+  }, []);
 
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    if (isOpen) {
+      console.log('Dialog opened, fetching categories');
+      fetchCategories();
+    }
+  }, [isOpen, fetchCategories]);
 
   const buildCategoryTree = (flatCategories: any[]) => {
     const idField = flatCategories.length > 0 && flatCategories[0].Id !== undefined ? 'Id' : 'id';
