@@ -15,7 +15,7 @@ interface ItemTableProps {
 }
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'sku' | 'name';
+type SortField = 'sku' | 'name' | 'asin';
 
 export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, onItemClick }) => {
   const [sortField, setSortField] = useState<SortField>('sku');
@@ -66,8 +66,9 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
   const extractItemData = (item: any) => {
     const sku = item.SKU || item.sku || item.Sku || item.articleNumber || item.ArticleNumber || '';
     const name = item.Name || item.name || item.ItemName || item.itemName || item.description || item.Description || '';
+    const asin = item.Identifiers?.Asins?.[0] || item.identifiers?.asins?.[0] || item.Asins?.[0] || '';
     
-    return { sku, name };
+    return { sku, name, asin };
   };
 
   const sortedItems = useMemo(() => {
@@ -78,8 +79,8 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
       const itemA = extractItemData(a);
       const itemB = extractItemData(b);
       
-      const valueA = sortField === 'sku' ? itemA.sku : itemA.name;
-      const valueB = sortField === 'sku' ? itemB.sku : itemB.name;
+      const valueA = sortField === 'sku' ? itemA.sku : (sortField === 'name' ? itemA.name : itemA.asin);
+      const valueB = sortField === 'sku' ? itemB.sku : (sortField === 'name' ? itemB.name : itemB.asin);
 
       if (sortDirection === 'asc') {
         return valueA.localeCompare(valueB);
@@ -120,11 +121,17 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
             >
               Name{getSortIndicator('name')}
             </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50" 
+              onClick={() => handleSort('asin')}
+            >
+              ASIN{getSortIndicator('asin')}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedItems.map((item, index) => {
-            const { sku, name } = extractItemData(item);
+            const { sku, name, asin } = extractItemData(item);
             return (
               <TableRow 
                 key={index}
@@ -133,6 +140,7 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
               >
                 <TableCell>{sku}</TableCell>
                 <TableCell>{name}</TableCell>
+                <TableCell>{asin}</TableCell>
               </TableRow>
             );
           })}
