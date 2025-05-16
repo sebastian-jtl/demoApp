@@ -72,7 +72,7 @@ export const HomePage = () => {
   );
 
   const handleCreateItem = useCallback(
-    async (newItem: { sku: string; name: string }) => {
+    async (newItem: { sku: string; name: string; categoryId?: string }) => {
       setLoading(true);
       try {
         const token = await getSessionToken();

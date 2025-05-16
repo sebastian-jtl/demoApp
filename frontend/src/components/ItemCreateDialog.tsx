@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,20 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { getSessionToken } from '@/lib/bridgeService';
+import { wawiClient } from '@/lib/wawiClient';
+import { Check, ChevronsUpDown } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ItemCreateDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: { sku: string; name: string }) => void;
+  onSave: (item: { sku: string; name: string; categoryId?: string }) => void;
   isLoading?: boolean;
 }
 
@@ -26,7 +35,92 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
 }) => {
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
+  const [categoryId, setCategoryId] = useState<string>('');
+  const [categories, setCategories] = useState<any[]>([]);
+  const [categoryTree, setCategoryTree] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [categoryLoading, setCategoryLoading] = useState(false);
+
+  const fetchCategories = useCallback(async () => {
+    if (!isOpen) return;
+    
+    setCategoryLoading(true);
+    try {
+      const token = await getSessionToken();
+      const data = await wawiClient.get<any>('/api/erp/categories', token);
+      
+      const categoriesArray = Array.isArray(data) ? data : 
+                             data.Categories || data.categories || data.items || data.results || [];
+      
+      setCategories(categoriesArray);
+      
+      const tree = buildCategoryTree(categoriesArray);
+      setCategoryTree(tree);
+    } catch (err: any) {
+      console.error('Error fetching categories:', err);
+      setError('Fehler beim Laden der Kategorien');
+    } finally {
+      setCategoryLoading(false);
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
+    fetchCategories();
+  }, [fetchCategories]);
+
+  const buildCategoryTree = (flatCategories: any[]) => {
+    const idField = flatCategories.length > 0 && flatCategories[0].Id !== undefined ? 'Id' : 'id';
+    const parentIdField = flatCategories.length > 0 && flatCategories[0].ParentId !== undefined ? 'ParentId' : 'parentId';
+    
+    const categoryMap = new Map();
+    flatCategories.forEach(category => {
+      categoryMap.set(category[idField], { ...category, children: [] });
+    });
+    
+    const rootCategories: any[] = [];
+    flatCategories.forEach(category => {
+      const categoryWithChildren = categoryMap.get(category[idField]);
+      const parentId = category[parentIdField];
+      
+      if (!parentId) {
+        rootCategories.push(categoryWithChildren);
+      } else {
+        const parentCategory = categoryMap.get(parentId);
+        if (parentCategory) {
+          parentCategory.children.push(categoryWithChildren);
+        } else {
+          rootCategories.push(categoryWithChildren);
+        }
+      }
+    });
+    
+    return rootCategories;
+  };
+
+  const renderCategoryTree = (categories: any[], depth = 0) => {
+    return categories.map(category => {
+      const id = category.id || category.Id;
+      const name = category.name || category.Name;
+      const hasChildren = category.children && category.children.length > 0;
+      
+      return (
+        <React.Fragment key={id}>
+          <DropdownMenuItem
+            onClick={() => {
+              setCategoryId(id);
+              setIsCategoryDropdownOpen(false);
+            }}
+            className={`pl-${depth * 4 + 2} ${categoryId === id ? 'bg-accent text-accent-foreground' : ''}`}
+          >
+            <Check className={`mr-2 h-4 w-4 ${categoryId === id ? 'opacity-100' : 'opacity-0'}`} />
+            {name}
+          </DropdownMenuItem>
+          {hasChildren && renderCategoryTree(category.children, depth + 1)}
+        </React.Fragment>
+      );
+    });
+  };
 
   const handleSave = () => {
     if (!sku.trim()) {
@@ -37,15 +131,21 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
       setError('Name ist erforderlich');
       return;
     }
-    onSave({ sku, name });
+    if (!categoryId) {
+      setError('Kategorie ist erforderlich');
+      return;
+    }
+    onSave({ sku, name, categoryId });
     setSku('');
     setName('');
+    setCategoryId('');
     setError(null);
   };
 
   const handleDialogClose = () => {
     setSku('');
     setName('');
+    setCategoryId('');
     setError(null);
     onClose();
   };
@@ -81,6 +181,46 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
               className="col-span-3"
               disabled={isLoading}
             />
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-category" className="text-right text-sm font-medium">
+              Kategorie
+            </label>
+            <div className="col-span-3">
+              <DropdownMenu open={isCategoryDropdownOpen} onOpenChange={setIsCategoryDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    role="combobox"
+                    aria-expanded={isCategoryDropdownOpen}
+                    className="w-full justify-between"
+                    disabled={isLoading || categoryLoading}
+                  >
+                    {categoryId ? 
+                      categories.find(category => {
+                        const id = category.id || category.Id;
+                        return id === categoryId;
+                      })?.Name || 
+                      categories.find(category => {
+                        const id = category.id || category.Id;
+                        return id === categoryId;
+                      })?.name || 
+                      'Kategorie auswählen' 
+                      : 'Kategorie auswählen'}
+                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-full max-h-60 overflow-y-auto">
+                  {categoryLoading ? (
+                    <div className="px-2 py-1.5 text-sm">Lade Kategorien...</div>
+                  ) : categoryTree.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm">Keine Kategorien gefunden</div>
+                  ) : (
+                    renderCategoryTree(categoryTree)
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
         </div>
         <DialogFooter>
