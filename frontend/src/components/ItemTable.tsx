@@ -180,7 +180,7 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
         </TableHeader>
         <TableBody>
           {sortedItems.map((item, index) => {
-            const { sku, name, asin } = extractItemData(item);
+            const { sku, name, asin, isbn, upc, amazonFnsku, ownIdentifier, manufacturerNumber } = extractItemData(item);
             return (
               <TableRow 
                 key={index}
