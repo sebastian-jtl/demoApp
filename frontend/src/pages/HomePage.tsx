@@ -1,17 +1,16 @@
 import { useEffect, useState, useCallback } from 'react';
 import { wawiClient } from '@/lib/wawiClient';
 import { getSessionToken } from '@/lib/bridgeService';
-import { ItemList } from '@/components/ItemList';
-import { ItemCreateModal } from '@/components/ItemCreateModal';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, Plus } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
+import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '@/components/ui/table';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export const HomePage = () => {
   const [items, setItems] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
 
   const fetchItems = useCallback(async () => {
     try {
@@ -35,18 +34,6 @@ export const HomePage = () => {
     setIsRefreshing(true);
     fetchItems();
   };
-  
-  const handleOpenCreateModal = () => {
-    setIsCreateModalOpen(true);
-  };
-
-  const handleCloseCreateModal = () => {
-    setIsCreateModalOpen(false);
-  };
-
-  const handleItemCreated = () => {
-    fetchItems();
-  };
 
   useEffect(() => {
     fetchItems();
@@ -58,40 +45,61 @@ export const HomePage = () => {
 
       {error && <p className="text-red-600">{error}</p>}
       
-      <div className="bg-white p-4 rounded shadow w-full max-w-3xl">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Artikelliste</h2>
-          <div className="flex gap-2">
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              size="sm"
-              disabled={isRefreshing}
-              className="flex items-center gap-1"
-            >
-              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>Aktualisieren</span>
-            </Button>
-            <Button 
-              onClick={handleOpenCreateModal} 
-              variant="default" 
-              size="sm"
-              className="flex items-center gap-1"
-            >
-              <Plus className="h-4 w-4" />
-              <span>Neuer Artikel</span>
-            </Button>
-          </div>
-        </div>
-        
-        <ItemList items={items} isLoading={loading} />
-        
-        <ItemCreateModal
-          isOpen={isCreateModalOpen}
-          onClose={handleCloseCreateModal}
-          onItemCreated={handleItemCreated}
-        />
-      </div>
+      <Card className="w-full max-w-3xl">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Artikelliste</CardTitle>
+          <Button 
+            onClick={handleRefresh} 
+            variant="outline" 
+            size="sm"
+            disabled={isRefreshing}
+            className="flex items-center gap-1"
+          >
+            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+            <span>Aktualisieren</span>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <p className="text-gray-600">Lade Daten...</p>
+          ) : items ? (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>SKU</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>ID</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {Array.isArray(items) ? (
+                  items.map((item, index) => (
+                    <TableRow key={item.Id || index}>
+                      <TableCell>{item.SKU || 'N/A'}</TableCell>
+                      <TableCell>{item.Name || 'N/A'}</TableCell>
+                      <TableCell>{item.Id || 'N/A'}</TableCell>
+                    </TableRow>
+                  ))
+                ) : items.Items && Array.isArray(items.Items) ? (
+                  items.Items.map((item, index) => (
+                    <TableRow key={item.Id || index}>
+                      <TableCell>{item.SKU || 'N/A'}</TableCell>
+                      <TableCell>{item.Name || 'N/A'}</TableCell>
+                      <TableCell>{item.Id || 'N/A'}</TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={3} className="text-center">Keine Artikel gefunden</TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          ) : (
+            <p className="text-gray-600">Keine Daten verfügbar</p>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
