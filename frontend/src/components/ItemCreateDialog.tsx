@@ -48,10 +48,14 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
       const token = await getSessionToken();
       const data = await wawiClient.get<any>('/api/erp/categories', token);
       
-      const categoriesArray = Array.isArray(data) ? data : 
-                             data.Categories || data.categories || data.items || data.results || [];
+      console.log('Raw API response:', data);
       
-      console.log('Categories fetched:', categoriesArray);
+      const categoriesArray = Array.isArray(data) ? data : 
+                             data.Items || data.items || 
+                             data.Categories || data.categories || 
+                             data.results || [];
+      
+      console.log('Categories extracted:', categoriesArray);
       setCategories(categoriesArray);
       
       const tree = buildCategoryTree(categoriesArray);
@@ -73,8 +77,23 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
   }, [isOpen, fetchCategories]);
 
   const buildCategoryTree = (flatCategories: any[]) => {
-    const idField = flatCategories.length > 0 && flatCategories[0].Id !== undefined ? 'Id' : 'id';
-    const parentIdField = flatCategories.length > 0 && flatCategories[0].ParentId !== undefined ? 'ParentId' : 'parentId';
+    if (flatCategories.length === 0) {
+      return [];
+    }
+    
+    let idField = 'id';
+    if (flatCategories[0].Id !== undefined) {
+      idField = 'Id';
+    }
+    
+    let parentIdField = 'parentId';
+    if (flatCategories[0].ParentId !== undefined) {
+      parentIdField = 'ParentId';
+    } else if (flatCategories[0].ParentCategoryId !== undefined) {
+      parentIdField = 'ParentCategoryId';
+    }
+    
+    console.log('Using ID field:', idField, 'and parent ID field:', parentIdField);
     
     const categoryMap = new Map();
     flatCategories.forEach(category => {
