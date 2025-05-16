@@ -39,17 +39,26 @@ export const HomePage = () => {
       setLoading(true);
       try {
         const token = await getSessionToken();
-        const itemToUpdate = { ...selectedItem };
+        const itemToUpdate: Record<string, string> = {};
         
-        if (selectedItem.SKU !== undefined) itemToUpdate.SKU = updatedItem.sku;
-        else if (selectedItem.sku !== undefined) itemToUpdate.sku = updatedItem.sku;
+        const originalSku = selectedItem.SKU || selectedItem.sku || selectedItem.Sku || '';
+        const originalName = selectedItem.Name || selectedItem.name || selectedItem.ItemName || selectedItem.itemName || '';
         
-        if (selectedItem.Name !== undefined) itemToUpdate.Name = updatedItem.name;
-        else if (selectedItem.name !== undefined) itemToUpdate.name = updatedItem.name;
+        if (updatedItem.sku !== originalSku) {
+          if (selectedItem.SKU !== undefined) itemToUpdate.SKU = updatedItem.sku;
+          else if (selectedItem.sku !== undefined) itemToUpdate.sku = updatedItem.sku;
+        }
         
-        await wawiClient.patch(`/api/erp/items/${selectedItem.id || selectedItem.Id || selectedItem.ID}`, token, itemToUpdate);
+        if (updatedItem.name !== originalName) {
+          if (selectedItem.Name !== undefined) itemToUpdate.Name = updatedItem.name;
+          else if (selectedItem.name !== undefined) itemToUpdate.name = updatedItem.name;
+        }
         
-        await fetchItems();
+        if (Object.keys(itemToUpdate).length > 0) {
+          await wawiClient.patch(`/api/erp/items/${selectedItem.id || selectedItem.Id || selectedItem.ID}`, token, itemToUpdate);
+          await fetchItems();
+        }
+        
         setIsEditDialogOpen(false);
       } catch (err: any) {
         setError(`Fehler beim Aktualisieren des Artikels: ${err}`);
