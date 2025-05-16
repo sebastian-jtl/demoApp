@@ -11,12 +11,13 @@ import {
 interface ItemTableProps {
   items: any;
   isLoading?: boolean;
+  onItemClick?: (item: any) => void;
 }
 
 type SortDirection = 'asc' | 'desc';
 type SortField = 'sku' | 'name';
 
-export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false }) => {
+export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, onItemClick }) => {
   const [sortField, setSortField] = useState<SortField>('sku');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
@@ -125,7 +126,11 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false }
           {sortedItems.map((item, index) => {
             const { sku, name } = extractItemData(item);
             return (
-              <TableRow key={index}>
+              <TableRow 
+                key={index}
+                onClick={() => onItemClick && onItemClick(item)}
+                className={onItemClick ? "cursor-pointer hover:bg-gray-50" : ""}
+              >
                 <TableCell>{sku}</TableCell>
                 <TableCell>{name}</TableCell>
               </TableRow>
