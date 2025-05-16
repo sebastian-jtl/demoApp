@@ -35,16 +35,17 @@ export const HomePage = () => {
   }, []);
 
   const handleSaveItem = useCallback(
-    async (updatedItem: { sku: string; name: string }) => {
+    async (updatedItem: { sku: string; name: string; asins?: string[] }) => {
       if (!selectedItem) return;
       
       setLoading(true);
       try {
         const token = await getSessionToken();
-        const itemToUpdate: Record<string, string> = {};
+        const itemToUpdate: Record<string, any> = {};
         
         const originalSku = selectedItem.SKU || selectedItem.sku || selectedItem.Sku || '';
         const originalName = selectedItem.Name || selectedItem.name || selectedItem.ItemName || selectedItem.itemName || '';
+        const originalAsins = selectedItem.Identifiers?.Asins || selectedItem.identifiers?.asins || selectedItem.Asins || [];
         
         if (updatedItem.sku !== originalSku) {
           if (selectedItem.SKU !== undefined) itemToUpdate.SKU = updatedItem.sku;
@@ -54,6 +55,12 @@ export const HomePage = () => {
         if (updatedItem.name !== originalName) {
           if (selectedItem.Name !== undefined) itemToUpdate.Name = updatedItem.name;
           else if (selectedItem.name !== undefined) itemToUpdate.name = updatedItem.name;
+        }
+        
+        if (updatedItem.asins && JSON.stringify(updatedItem.asins) !== JSON.stringify(originalAsins)) {
+          if (selectedItem.Identifiers?.Asins !== undefined) itemToUpdate.Identifiers = { ...selectedItem.Identifiers, Asins: updatedItem.asins };
+          else if (selectedItem.identifiers?.asins !== undefined) itemToUpdate.identifiers = { ...selectedItem.identifiers, asins: updatedItem.asins };
+          else if (selectedItem.Asins !== undefined) itemToUpdate.Asins = updatedItem.asins;
         }
         
         if (Object.keys(itemToUpdate).length > 0) {
@@ -72,14 +79,17 @@ export const HomePage = () => {
   );
 
   const handleCreateItem = useCallback(
-    async (newItem: { sku: string; name: string; categoryId?: string }) => {
+    async (newItem: { sku: string; name: string; categoryId?: string; asins?: string[] }) => {
       setLoading(true);
       try {
         const token = await getSessionToken();
         const payload = {
           SKU: newItem.sku,
           Name: newItem.name,
-          Categories: newItem.categoryId ? [{ categoryId: newItem.categoryId }] : []
+          Categories: newItem.categoryId ? [{ categoryId: newItem.categoryId }] : [],
+          Identifiers: {
+            Asins: newItem.asins && newItem.asins.length > 0 ? newItem.asins : []
+          }
         };
         console.log('Creating item with payload:', payload);
         await wawiClient.post('/api/erp/items', token, payload);
@@ -133,7 +143,8 @@ export const HomePage = () => {
         onSave={handleSaveItem}
         item={selectedItem ? {
           sku: selectedItem.SKU || selectedItem.sku || selectedItem.Sku || '',
-          name: selectedItem.Name || selectedItem.name || selectedItem.ItemName || selectedItem.itemName || ''
+          name: selectedItem.Name || selectedItem.name || selectedItem.ItemName || selectedItem.itemName || '',
+          asins: selectedItem.Identifiers?.Asins || selectedItem.identifiers?.asins || selectedItem.Asins || []
         } : null}
         isLoading={loading}
       />

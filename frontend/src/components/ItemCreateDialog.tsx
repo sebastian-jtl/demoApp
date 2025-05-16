@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { getSessionToken } from '@/lib/bridgeService';
 import { wawiClient } from '@/lib/wawiClient';
-import { Check, ChevronsUpDown } from 'lucide-react';
+import { Check, ChevronsUpDown, X, Plus } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ import {
 interface ItemCreateDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: { sku: string; name: string; categoryId?: string }) => void;
+  onSave: (item: { sku: string; name: string; categoryId?: string; asins?: string[] }) => void;
   isLoading?: boolean;
 }
 
@@ -36,6 +36,7 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
+  const [asins, setAsins] = useState<string[]>(['']);
   const [categories, setCategories] = useState<any[]>([]);
   const [categoryTree, setCategoryTree] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -157,7 +158,7 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
       setError('Kategorie ist erforderlich');
       return;
     }
-    onSave({ sku, name, categoryId });
+    onSave({ sku, name, categoryId, asins: asins.filter(asin => asin.trim() !== '') });
     setSku('');
     setName('');
     setCategoryId('');
@@ -168,6 +169,7 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
     setSku('');
     setName('');
     setCategoryId('');
+    setAsins(['']);
     setError(null);
     onClose();
   };
@@ -242,6 +244,51 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
                   )}
                 </DropdownMenuContent>
               </DropdownMenu>
+            </div>
+          </div>
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-asins" className="text-right text-sm font-medium">
+              ASINs
+            </label>
+            <div className="col-span-3 space-y-2">
+              {asins.map((asin, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <Input
+                    id={index === 0 ? "create-asins" : `create-asins-${index}`}
+                    value={asin}
+                    onChange={(e) => {
+                      const newAsins = [...asins];
+                      newAsins[index] = e.target.value;
+                      setAsins(newAsins);
+                    }}
+                    className="flex-1"
+                    placeholder="Enter ASIN (Optional)"
+                    disabled={isLoading}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    onClick={() => {
+                      const newAsins = [...asins];
+                      newAsins.splice(index, 1);
+                      setAsins(newAsins);
+                    }}
+                    disabled={isLoading || asins.length === 1}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setAsins([...asins, ''])}
+                disabled={isLoading}
+              >
+                <Plus className="h-4 w-4 mr-2" /> Add ASIN
+              </Button>
             </div>
           </div>
         </div>
