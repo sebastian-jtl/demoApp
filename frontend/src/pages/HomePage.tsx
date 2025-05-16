@@ -76,7 +76,13 @@ export const HomePage = () => {
       setLoading(true);
       try {
         const token = await getSessionToken();
-        await wawiClient.post('/api/erp/items', token, newItem);
+        const payload = {
+          SKU: newItem.sku,
+          Name: newItem.name,
+          Categories: newItem.categoryId ? [{ categoryId: newItem.categoryId }] : []
+        };
+        console.log('Creating item with payload:', payload);
+        await wawiClient.post('/api/erp/items', token, payload);
         await fetchItems();
         setIsCreateDialogOpen(false);
       } catch (err: any) {
