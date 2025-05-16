@@ -15,8 +15,26 @@ import { X, Plus } from 'lucide-react';
 interface ItemEditDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: { sku: string; name: string; asins?: string[] }) => void;
-  item: { sku: string; name: string; asins?: string[] } | null;
+  onSave: (item: { 
+    sku: string; 
+    name: string; 
+    asins?: string[]; 
+    isbn?: string;
+    upc?: string;
+    amazonFnsku?: string;
+    ownIdentifier?: string;
+    manufacturerNumber?: string;
+  }) => void;
+  item: { 
+    sku: string; 
+    name: string; 
+    asins?: string[]; 
+    isbn?: string;
+    upc?: string;
+    amazonFnsku?: string;
+    ownIdentifier?: string;
+    manufacturerNumber?: string;
+  } | null;
   isLoading?: boolean;
 }
 
@@ -30,6 +48,11 @@ export const ItemEditDialog: React.FC<ItemEditDialogProps> = ({
   const [sku, setSku] = useState('');
   const [name, setName] = useState('');
   const [asins, setAsins] = useState<string[]>([]);
+  const [isbn, setIsbn] = useState('');
+  const [upc, setUpc] = useState('');
+  const [amazonFnsku, setAmazonFnsku] = useState('');
+  const [ownIdentifier, setOwnIdentifier] = useState('');
+  const [manufacturerNumber, setManufacturerNumber] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -37,6 +60,11 @@ export const ItemEditDialog: React.FC<ItemEditDialogProps> = ({
       setSku(item.sku);
       setName(item.name);
       setAsins(item.asins || []);
+      setIsbn(item.isbn || '');
+      setUpc(item.upc || '');
+      setAmazonFnsku(item.amazonFnsku || '');
+      setOwnIdentifier(item.ownIdentifier || '');
+      setManufacturerNumber(item.manufacturerNumber || '');
       setError(null);
     }
   }, [item]);
@@ -50,7 +78,16 @@ export const ItemEditDialog: React.FC<ItemEditDialogProps> = ({
       setError('Name ist erforderlich');
       return;
     }
-    onSave({ sku, name, asins: asins.filter(asin => asin.trim() !== '') });
+    onSave({ 
+      sku, 
+      name, 
+      asins: asins.filter(asin => asin.trim() !== ''),
+      isbn: isbn.trim() !== '' ? isbn : undefined,
+      upc: upc.trim() !== '' ? upc : undefined,
+      amazonFnsku: amazonFnsku.trim() !== '' ? amazonFnsku : undefined,
+      ownIdentifier: ownIdentifier.trim() !== '' ? ownIdentifier : undefined,
+      manufacturerNumber: manufacturerNumber.trim() !== '' ? manufacturerNumber : undefined
+    });
   };
 
   return (
@@ -129,6 +166,76 @@ export const ItemEditDialog: React.FC<ItemEditDialogProps> = ({
                 <Plus className="h-4 w-4 mr-2" /> Add ASIN
               </Button>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="isbn" className="text-right text-sm font-medium">
+              ISBN
+            </label>
+            <Input
+              id="isbn"
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter ISBN (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="upc" className="text-right text-sm font-medium">
+              UPC
+            </label>
+            <Input
+              id="upc"
+              value={upc}
+              onChange={(e) => setUpc(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter UPC (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="amazonFnsku" className="text-right text-sm font-medium">
+              Amazon FNSKU
+            </label>
+            <Input
+              id="amazonFnsku"
+              value={amazonFnsku}
+              onChange={(e) => setAmazonFnsku(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter Amazon FNSKU (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="ownIdentifier" className="text-right text-sm font-medium">
+              Eigene ID
+            </label>
+            <Input
+              id="ownIdentifier"
+              value={ownIdentifier}
+              onChange={(e) => setOwnIdentifier(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter Own Identifier (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="manufacturerNumber" className="text-right text-sm font-medium">
+              Herstellernummer
+            </label>
+            <Input
+              id="manufacturerNumber"
+              value={manufacturerNumber}
+              onChange={(e) => setManufacturerNumber(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter Manufacturer Number (Optional)"
+              disabled={isLoading}
+            />
           </div>
         </div>
         <DialogFooter>

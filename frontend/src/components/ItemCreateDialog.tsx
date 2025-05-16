@@ -23,7 +23,17 @@ import {
 interface ItemCreateDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (item: { sku: string; name: string; categoryId?: string; asins?: string[] }) => void;
+  onSave: (item: { 
+    sku: string; 
+    name: string; 
+    categoryId?: string; 
+    asins?: string[];
+    isbn?: string;
+    upc?: string;
+    amazonFnsku?: string;
+    ownIdentifier?: string;
+    manufacturerNumber?: string;
+  }) => void;
   isLoading?: boolean;
 }
 
@@ -37,6 +47,11 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
   const [name, setName] = useState('');
   const [categoryId, setCategoryId] = useState<string>('');
   const [asins, setAsins] = useState<string[]>(['']);
+  const [isbn, setIsbn] = useState('');
+  const [upc, setUpc] = useState('');
+  const [amazonFnsku, setAmazonFnsku] = useState('');
+  const [ownIdentifier, setOwnIdentifier] = useState('');
+  const [manufacturerNumber, setManufacturerNumber] = useState('');
   const [categories, setCategories] = useState<any[]>([]);
   const [categoryTree, setCategoryTree] = useState<any[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -158,10 +173,25 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
       setError('Kategorie ist erforderlich');
       return;
     }
-    onSave({ sku, name, categoryId, asins: asins.filter(asin => asin.trim() !== '') });
+    onSave({ 
+      sku, 
+      name, 
+      categoryId, 
+      asins: asins.filter(asin => asin.trim() !== ''),
+      isbn: isbn.trim() !== '' ? isbn : undefined,
+      upc: upc.trim() !== '' ? upc : undefined,
+      amazonFnsku: amazonFnsku.trim() !== '' ? amazonFnsku : undefined,
+      ownIdentifier: ownIdentifier.trim() !== '' ? ownIdentifier : undefined,
+      manufacturerNumber: manufacturerNumber.trim() !== '' ? manufacturerNumber : undefined
+    });
     setSku('');
     setName('');
     setCategoryId('');
+    setIsbn('');
+    setUpc('');
+    setAmazonFnsku('');
+    setOwnIdentifier('');
+    setManufacturerNumber('');
     setError(null);
   };
 
@@ -170,6 +200,11 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
     setName('');
     setCategoryId('');
     setAsins(['']);
+    setIsbn('');
+    setUpc('');
+    setAmazonFnsku('');
+    setOwnIdentifier('');
+    setManufacturerNumber('');
     setError(null);
     onClose();
   };
@@ -290,6 +325,76 @@ export const ItemCreateDialog: React.FC<ItemCreateDialogProps> = ({
                 <Plus className="h-4 w-4 mr-2" /> Add ASIN
               </Button>
             </div>
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-isbn" className="text-right text-sm font-medium">
+              ISBN
+            </label>
+            <Input
+              id="create-isbn"
+              value={isbn}
+              onChange={(e) => setIsbn(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter ISBN (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-upc" className="text-right text-sm font-medium">
+              UPC
+            </label>
+            <Input
+              id="create-upc"
+              value={upc}
+              onChange={(e) => setUpc(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter UPC (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-amazonFnsku" className="text-right text-sm font-medium">
+              Amazon FNSKU
+            </label>
+            <Input
+              id="create-amazonFnsku"
+              value={amazonFnsku}
+              onChange={(e) => setAmazonFnsku(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter Amazon FNSKU (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-ownIdentifier" className="text-right text-sm font-medium">
+              Eigene ID
+            </label>
+            <Input
+              id="create-ownIdentifier"
+              value={ownIdentifier}
+              onChange={(e) => setOwnIdentifier(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter Own Identifier (Optional)"
+              disabled={isLoading}
+            />
+          </div>
+          
+          <div className="grid grid-cols-4 items-center gap-4">
+            <label htmlFor="create-manufacturerNumber" className="text-right text-sm font-medium">
+              Herstellernummer
+            </label>
+            <Input
+              id="create-manufacturerNumber"
+              value={manufacturerNumber}
+              onChange={(e) => setManufacturerNumber(e.target.value)}
+              className="col-span-3"
+              placeholder="Enter Manufacturer Number (Optional)"
+              disabled={isLoading}
+            />
           </div>
         </div>
         <DialogFooter>
