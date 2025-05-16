@@ -15,7 +15,7 @@ interface ItemTableProps {
 }
 
 type SortDirection = 'asc' | 'desc';
-type SortField = 'sku' | 'name' | 'asin';
+type SortField = 'sku' | 'name' | 'asin' | 'isbn' | 'upc' | 'amazonFnsku' | 'ownIdentifier' | 'manufacturerNumber';
 
 export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, onItemClick }) => {
   const [sortField, setSortField] = useState<SortField>('sku');
@@ -67,8 +67,13 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
     const sku = item.SKU || item.sku || item.Sku || item.articleNumber || item.ArticleNumber || '';
     const name = item.Name || item.name || item.ItemName || item.itemName || item.description || item.Description || '';
     const asin = item.Identifiers?.Asins?.[0] || item.identifiers?.asins?.[0] || item.Asins?.[0] || '';
+    const isbn = item.Identifiers?.ISBN || item.identifiers?.isbn || item.ISBN || '';
+    const upc = item.Identifiers?.UPC || item.identifiers?.upc || item.UPC || '';
+    const amazonFnsku = item.Identifiers?.AmazonFnsku || item.identifiers?.amazonFnsku || item.AmazonFnsku || '';
+    const ownIdentifier = item.Identifiers?.OwnIdentifier || item.identifiers?.ownIdentifier || item.OwnIdentifier || '';
+    const manufacturerNumber = item.ManufacturerNumber || item.manufacturerNumber || '';
     
-    return { sku, name, asin };
+    return { sku, name, asin, isbn, upc, amazonFnsku, ownIdentifier, manufacturerNumber };
   };
 
   const sortedItems = useMemo(() => {
@@ -79,8 +84,22 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
       const itemA = extractItemData(a);
       const itemB = extractItemData(b);
       
-      const valueA = sortField === 'sku' ? itemA.sku : (sortField === 'name' ? itemA.name : itemA.asin);
-      const valueB = sortField === 'sku' ? itemB.sku : (sortField === 'name' ? itemB.name : itemB.asin);
+      const valueA = (sortField === 'sku' ? itemA.sku : 
+                 sortField === 'name' ? itemA.name : 
+                 sortField === 'asin' ? itemA.asin :
+                 sortField === 'isbn' ? itemA.isbn :
+                 sortField === 'upc' ? itemA.upc :
+                 sortField === 'amazonFnsku' ? itemA.amazonFnsku :
+                 sortField === 'ownIdentifier' ? itemA.ownIdentifier :
+                 itemA.manufacturerNumber) || '';
+      const valueB = (sortField === 'sku' ? itemB.sku : 
+                 sortField === 'name' ? itemB.name : 
+                 sortField === 'asin' ? itemB.asin :
+                 sortField === 'isbn' ? itemB.isbn :
+                 sortField === 'upc' ? itemB.upc :
+                 sortField === 'amazonFnsku' ? itemB.amazonFnsku :
+                 sortField === 'ownIdentifier' ? itemB.ownIdentifier :
+                 itemB.manufacturerNumber) || '';
 
       if (sortDirection === 'asc') {
         return valueA.localeCompare(valueB);
@@ -127,6 +146,36 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
             >
               ASIN{getSortIndicator('asin')}
             </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50" 
+              onClick={() => handleSort('isbn')}
+            >
+              ISBN{getSortIndicator('isbn')}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50" 
+              onClick={() => handleSort('upc')}
+            >
+              UPC{getSortIndicator('upc')}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50" 
+              onClick={() => handleSort('amazonFnsku')}
+            >
+              Amazon FNSKU{getSortIndicator('amazonFnsku')}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50" 
+              onClick={() => handleSort('ownIdentifier')}
+            >
+              Eigene ID{getSortIndicator('ownIdentifier')}
+            </TableHead>
+            <TableHead 
+              className="cursor-pointer hover:bg-muted/50" 
+              onClick={() => handleSort('manufacturerNumber')}
+            >
+              Herstellernummer{getSortIndicator('manufacturerNumber')}
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -141,6 +190,11 @@ export const ItemTable: React.FC<ItemTableProps> = ({ items, isLoading = false, 
                 <TableCell>{sku}</TableCell>
                 <TableCell>{name}</TableCell>
                 <TableCell>{asin}</TableCell>
+                <TableCell>{isbn}</TableCell>
+                <TableCell>{upc}</TableCell>
+                <TableCell>{amazonFnsku}</TableCell>
+                <TableCell>{ownIdentifier}</TableCell>
+                <TableCell>{manufacturerNumber}</TableCell>
               </TableRow>
             );
           })}
